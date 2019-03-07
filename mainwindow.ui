@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>901</width>
+    <height>458</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>MainWindow</string>
+  </property>
+  <widget class="QWidget" name="centralWidget">
+   <layout class="QGridLayout" name="gridLayout">
+    <item row="0" column="0">
+     <widget class="QGroupBox" name="groupOrig">
+      <property name="title">
+       <string>Оригинал</string>
+      </property>
+      <layout class="QGridLayout" name="gridLayout_2">
+       <item row="0" column="0">
+        <widget class="QGraphicsView" name="graphViewOrig"/>
+       </item>
+      </layout>
+     </widget>
+    </item>
+    <item row="0" column="1">
+     <widget class="QGroupBox" name="groupResult">
+      <property name="title">
+       <string>Результат</string>
+      </property>
+      <layout class="QGridLayout" name="gridLayout_3">
+       <item row="0" column="0">
+        <widget class="QGraphicsView" name="graphViewResult"/>
+       </item>
+      </layout>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QMenuBar" name="menuBar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>901</width>
+     <height>21</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="menuFile">
+    <property name="title">
+     <string>Файл</string>
+    </property>
+    <addaction name="actionLoad"/>
+   </widget>
+   <widget class="QMenu" name="menuFilters">
+    <property name="title">
+     <string>Фильтры</string>
+    </property>
+    <widget class="QMenu" name="menuFiltersConv">
+     <property name="title">
+      <string>Свёрточные</string>
+     </property>
+     <addaction name="actionBlurGaussian"/>
+     <addaction name="actionSobel"/>
+    </widget>
+    <addaction name="menuFiltersConv"/>
+   </widget>
+   <widget class="QMenu" name="menuSettings">
+    <property name="title">
+     <string>Установки</string>
+    </property>
+    <widget class="QMenu" name="menuEdgeResolve">
+     <property name="title">
+      <string>Обработка края</string>
+     </property>
+     <addaction name="actionEdgeResolveNull"/>
+     <addaction name="actionEdgeResolveNearest"/>
+     <addaction name="actionEdgeResolveMirror"/>
+     <addaction name="actionEdgeResolveRepeat"/>
+    </widget>
+    <addaction name="menuEdgeResolve"/>
+   </widget>
+   <addaction name="menuFile"/>
+   <addaction name="menuFilters"/>
+   <addaction name="menuSettings"/>
+  </widget>
+  <widget class="QStatusBar" name="statusBar"/>
+  <action name="actionLoad">
+   <property name="text">
+    <string>Загрузить...</string>
+   </property>
+  </action>
+  <action name="actionBlurGaussian">
+   <property name="text">
+    <string>Размытие (по Гауссу)</string>
+   </property>
+  </action>
+  <action name="actionSobel">
+   <property name="text">
+    <string>Оператор Собеля</string>
+   </property>
+  </action>
+  <action name="actionEdgeResolveNull">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Чёрный цвет</string>
+   </property>
+  </action>
+  <action name="actionEdgeResolveNearest">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Копировать край</string>
+   </property>
+  </action>
+  <action name="actionEdgeResolveMirror">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Отразить</string>
+   </property>
+  </action>
+  <action name="actionEdgeResolveRepeat">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Завернуть</string>
+   </property>
+  </action>
+ </widget>
+ <layoutdefault spacing="6" margin="11"/>
+ <resources/>
+ <connections/>
+</ui>
