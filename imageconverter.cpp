@@ -19,14 +19,14 @@ ImageMatrix *ImageConverter::qImageToMatrix(const QImage &image)
 			imageData[i * width + j] = rgbToGrayscaleS(
 						pixel.red(),
 						pixel.green(),
-						pixel.blue());
+						pixel.blue()) / 255.0;
 		}
 	ImageMatrix *result = new ImageMatrix(width, height, imageData);
 	delete[] imageData;
 	return result;
 }
 
-QImage *ImageConverter::matrixToQImage(ImageMatrix &image)
+QImage *ImageConverter::matrixToQImage(const ImageMatrix &image)
 {
 	int width = image.getWidth();
 	int height = image.getHeight();

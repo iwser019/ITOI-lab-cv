@@ -5,12 +5,17 @@ IMatrixEdgeResolver::IMatrixEdgeResolver()
 
 }
 
-double MatrixEdgeResolverNull::resolve(ImageMatrix &matrix, int x, int y)
+double MatrixEdgeResolverNull::resolve(const ImageMatrix &matrix, int x, int y)
 {
-	return 0.0;
+	double result = 0.0;
+	int width = matrix.getWidth();
+	int height = matrix.getHeight();
+	if ((x >= 0 && y >= 0) && (x < width && y < height))
+		result = matrix.get(x, y);
+	return result;
 }
 
-double MatrixEdgeResolverNearest::resolve(ImageMatrix &matrix, int x, int y)
+double MatrixEdgeResolverNearest::resolve(const ImageMatrix &matrix, int x, int y)
 {
 	double result = 0.0;
 	int width = matrix.getWidth();
@@ -21,7 +26,7 @@ double MatrixEdgeResolverNearest::resolve(ImageMatrix &matrix, int x, int y)
 	return result;
 }
 
-double MatrixEdgeResolverMirror::resolve(ImageMatrix &matrix, int x, int y)
+double MatrixEdgeResolverMirror::resolve(const ImageMatrix &matrix, int x, int y)
 {
 	double result = 0.0;
 	int width = matrix.getWidth();
@@ -32,7 +37,7 @@ double MatrixEdgeResolverMirror::resolve(ImageMatrix &matrix, int x, int y)
 	return result;
 }
 
-double MatrixEdgeResolverRepeat::resolve(ImageMatrix &matrix, int x, int y)
+double MatrixEdgeResolverRepeat::resolve(const ImageMatrix &matrix, int x, int y)
 {
 	double result = 0.0;
 	int width = matrix.getWidth();

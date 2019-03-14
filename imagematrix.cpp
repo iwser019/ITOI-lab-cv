@@ -15,17 +15,17 @@ ImageMatrix::ImageMatrix(int w, int h, double source[]) : ImageMatrix(w, h)
 	memcpy(this->data, source, w * h * sizeof (double));
 }
 
-int ImageMatrix::getWidth()
+int ImageMatrix::getWidth() const
 {
-	return this->width;
+	return width;
 }
 
-int ImageMatrix::getHeight()
+int ImageMatrix::getHeight() const
 {
-	return this->height;
+	return height;
 }
 
-double ImageMatrix::get(int x, int y)
+double ImageMatrix::get(int x, int y) const
 {
 	double result = 0.0;
 	if ((x >= 0 && x < width) && (y >= 0 && y < height))

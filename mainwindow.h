@@ -3,7 +3,11 @@
 
 #include <QMainWindow>
 #include <QActionGroup>
+#include <QFileDialog>
+#include <QInputDialog>
 #include "defs.h"
+#include "imageconverter.h"
+#include "imagematrixfunc.h"
 #include "imatrixedgeresolver.h"
 #include "matrixedgeresolverfactory.h"
 #include "gscene.h"
@@ -22,14 +26,18 @@ class MainWindow : public QMainWindow
 
 	private slots:
 		void on_actionLoad_triggered();
-
 		void on_actionEdgeResolveNull_triggered();
-
 		void on_actionEdgeResolveNearest_triggered();
-
 		void on_actionEdgeResolveMirror_triggered();
-
 		void on_actionEdgeResolveRepeat_triggered();
+		void on_actionBlurGaussian_triggered();
+		void on_actionSobel_triggered();
+
+		void on_actionBlurUniform_triggered();
+
+		void on_actionReset_triggered();
+
+		void on_actionBlurGaussianSeparate_triggered();
 
 	private:
 		Ui::MainWindow *ui;
@@ -37,6 +45,9 @@ class MainWindow : public QMainWindow
 		QImage *imgOrig, *imgResult;
 		QActionGroup *actGrpEdgeResolve;
 		IMatrixEdgeResolver *currentResolver;
+		void initResultImg();
+		void showImgOrig();
+		void showImgResult();
 };
 
 #endif // MAINWINDOW_H

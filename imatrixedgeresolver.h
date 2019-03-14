@@ -11,7 +11,8 @@ class IMatrixEdgeResolver
 {
 	public:
 		IMatrixEdgeResolver();
-		virtual double resolve(ImageMatrix &matrix, int x, int y) = 0;
+		virtual double resolve(const ImageMatrix &matrix, int x, int y) = 0;
+		virtual ~IMatrixEdgeResolver(){}
 };
 
 /*!
@@ -21,7 +22,8 @@ class MatrixEdgeResolverNull : public IMatrixEdgeResolver
 {
 	public:
 		MatrixEdgeResolverNull(){}
-		double resolve(ImageMatrix &matrix, int x, int y);
+		double resolve(const ImageMatrix &matrix, int x, int y);
+
 };
 
 /*!
@@ -31,7 +33,7 @@ class MatrixEdgeResolverNearest : public IMatrixEdgeResolver
 {
 	public:
 		MatrixEdgeResolverNearest(){}
-		double resolve(ImageMatrix &matrix, int x, int y);
+		double resolve(const ImageMatrix &matrix, int x, int y);
 };
 
 /*!
@@ -41,14 +43,14 @@ class MatrixEdgeResolverMirror : public IMatrixEdgeResolver
 {
 	public:
 		MatrixEdgeResolverMirror(){}
-		double resolve(ImageMatrix &matrix, int x, int y);
+		double resolve(const ImageMatrix &matrix, int x, int y);
 };
 
 class MatrixEdgeResolverRepeat : public IMatrixEdgeResolver
 {
 	public:
 		MatrixEdgeResolverRepeat(){}
-		double resolve(ImageMatrix &matrix, int x, int y);
+		double resolve(const ImageMatrix &matrix, int x, int y);
 };
 
 #endif // IMATRIXEDGERESOLVER_H

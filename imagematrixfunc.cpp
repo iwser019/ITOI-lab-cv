@@ -1,6 +1,6 @@
 #include "imagematrixfunc.h"
 
-ImageMatrix matrixAdd(ImageMatrix &matrix1, ImageMatrix &matrix2)
+ImageMatrix matrixAdd(const ImageMatrix &matrix1, const ImageMatrix &matrix2)
 {
 	int width = qMin(matrix1.getWidth(), matrix2.getWidth());
 	int height = qMin(matrix1.getHeight(), matrix2.getHeight());
@@ -22,8 +22,8 @@ ImageMatrix matrixSubtract(ImageMatrix &matrix1, ImageMatrix &matrix2)
 	return result;
 }
 
-ImageMatrix matrixConvolute(ImageMatrix &matrix,
-							ImageMatrix &kernel,
+ImageMatrix matrixConvolute(const ImageMatrix &matrix,
+							const ImageMatrix &kernel,
 							IMatrixEdgeResolver *resolver)
 {
 	int width = matrix.getWidth();
@@ -33,6 +33,8 @@ ImageMatrix matrixConvolute(ImageMatrix &matrix,
 	IMatrixEdgeResolver *currentResolver = nullptr;
 	if (resolver == nullptr)
 		currentResolver = new MatrixEdgeResolverNull();
+	else
+		currentResolver = resolver;
 	ImageMatrix result(width, height);
 	int kernelOffsetX = (widthKernel - 1) / 2;
 	int kernelOffsetY = (heightKernel - 1) / 2;
@@ -43,15 +45,18 @@ ImageMatrix matrixConvolute(ImageMatrix &matrix,
 			double value = 0.0;
 			for (int u = -kernelOffsetY; u <= kernelOffsetY; u++)
 				for (int v = -kernelOffsetX; v <= kernelOffsetX; v++)
-					value += kernel.get(v + kernelOffsetX, u + kernelOffsetY)
-							* currentResolver->resolve(matrix, j - v, i - u);
+				{
+					double valueKernel = kernel.get(v + kernelOffsetX, u + kernelOffsetY);
+					double valueResolved = currentResolver->resolve(matrix, j - v, i - u);
+					value += (valueKernel * valueResolved);
+				}
 			result.set(j, i, value);
 		}
 	}
 	return result;
 }
 
-ImageMatrix matrixNormalize(ImageMatrix &matrix)
+ImageMatrix matrixNormalize(const ImageMatrix &matrix)
 {
 	int width = matrix.getWidth();
 	int height = matrix.getHeight();
@@ -210,17 +215,16 @@ ImageMatrix kernelGenerateGaussian(double sigma)
 	int arraySize = diameter * diameter;
 	double value = 0.0;
 	double *kernelData = new double[arraySize];
+	// среднеквадратическое отклонение
+	double mean = 2.0 * sigma * sigma;
+	double mainCoeff = (1.0 / (2 * M_PI * sigma * sigma));
 	for (int y = -radius; y <= radius; y++)
 	{
 		double yVal = static_cast<double>(y);
 		for (int x = -radius; x <= radius; x++)
 		{
 			double xVal = static_cast<double>(x);
-			value = (1.0 / (2 * M_PI * sigma * sigma))
-					* exp(
-						(0.0 - (xVal * xVal + yVal + yVal))
-						/ (2.0 * sigma * sigma)
-						);
+			value = mainCoeff * exp((0.0 - (xVal * xVal + yVal * yVal)) / mean);
 			kernelData[(y + radius) * diameter + (x + radius)] = value;
 		}
 	}
@@ -254,7 +258,7 @@ ImageMatrix matrixAddScalar(ImageMatrix &matrix, double value)
 	return result;
 }
 
-ImageMatrix matrixFilterSobel(ImageMatrix &matrix,
+ImageMatrix matrixFilterSobel(const ImageMatrix &matrix,
 							  int kernelType,
 							  IMatrixEdgeResolver *resolver)
 {
@@ -264,12 +268,44 @@ ImageMatrix matrixFilterSobel(ImageMatrix &matrix,
 	ImageMatrix kernelY = kernelGeneratePartialDeriv(true, kernelType);
 	ImageMatrix matrixX = matrixConvolute(matrix, kernelX, resolver);
 	ImageMatrix matrixY = matrixConvolute(matrix, kernelY, resolver);
-	matrixX = matrixNormalize(matrixX);
-	matrixY = matrixNormalize(matrixY);
+	//ImageMatrix matrixXNorm = matrixNormalize(matrixX);
+	//ImageMatrix matrixYNorm = matrixNormalize(matrixY);
 	ImageMatrix result(width, height);
 	for (int i = 0; i < height; i++)
 		for (int j = 0; j < width; j++)
-			result.set(j, i, sqrt(matrixX.get(j, i) + matrixY.get(j, i)));
-	result = matrixNormalize(result);
+		{
+			double valueX = matrixX.get(j, i)*matrixX.get(j, i);
+			double valueY = matrixY.get(j, i)*matrixY.get(j, i);
+			double square = sqrt(valueX + valueY);
+			result.set(j, i, square);
+		}
+	ImageMatrix resultNorm = matrixNormalize(result);
+	return resultNorm;
+}
+
+ImageMatrix kernelGenerateGaussianSeparate(double sigma, bool orientation)
+{
+	// для соблюдения правила трёх сигм
+	// размер ядра зависит от параметра "сигма"
+	int radius = static_cast<int>(ceil(sigma * 3.0));
+	int diameter = radius * 2 + 1;
+	int arraySize = diameter;
+	double value = 0.0;
+	double *kernelData = new double[arraySize];
+	// среднеквадратическое отклонение
+	double mean = 2.0 * sigma * sigma;
+	double mainCoeff = (1.0 / (sqrt(2 * M_PI) * sigma));
+	for (int x = -radius; x <= radius; x++)
+	{
+		double xVal = static_cast<double>(x);
+		value = mainCoeff * exp((0.0 - (xVal * xVal)) / mean);
+		kernelData[(x + radius)] = value;
+	}
+	// собираем ядро
+	ImageMatrix result(
+				(!orientation ? diameter : 1),
+				(orientation ? diameter : 1),
+				kernelData);
+	delete [] kernelData;
 	return result;
 }

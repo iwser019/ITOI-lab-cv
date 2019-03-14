@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>MainWindow</string>
+   <string>ИТОИ</string>
   </property>
   <widget class="QWidget" name="centralWidget">
    <layout class="QGridLayout" name="gridLayout">
@@ -55,6 +55,7 @@
      <string>Файл</string>
     </property>
     <addaction name="actionLoad"/>
+    <addaction name="actionReset"/>
    </widget>
    <widget class="QMenu" name="menuFilters">
     <property name="title">
@@ -66,6 +67,8 @@
      </property>
      <addaction name="actionBlurGaussian"/>
      <addaction name="actionSobel"/>
+     <addaction name="actionBlurUniform"/>
+     <addaction name="actionBlurGaussianSeparate"/>
     </widget>
     <addaction name="menuFiltersConv"/>
    </widget>
@@ -134,6 +137,21 @@
    </property>
    <property name="text">
     <string>Завернуть</string>
+   </property>
+  </action>
+  <action name="actionBlurUniform">
+   <property name="text">
+    <string>Размытие (box-фильтр)</string>
+   </property>
+  </action>
+  <action name="actionReset">
+   <property name="text">
+    <string>Сброс</string>
+   </property>
+  </action>
+  <action name="actionBlurGaussianSeparate">
+   <property name="text">
+    <string>Размытие (по Гауссу) (проверка сепарабельности)</string>
    </property>
   </action>
  </widget>

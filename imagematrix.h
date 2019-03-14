@@ -16,9 +16,9 @@ class ImageMatrix
 	public:
 		ImageMatrix(int w, int h);
 		ImageMatrix(int w, int h, double source[]);
-		int getWidth();
-		int getHeight();
-		double get(int x, int y);
+		int getWidth() const;
+		int getHeight() const;
+		double get(int x, int y) const;
 		void set(int x, int y, double source);
 		~ImageMatrix();
 };

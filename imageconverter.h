@@ -17,7 +17,7 @@ class ImageConverter
 		 * \return Матрица изображения (оттенки серого)
 		 */
 		static ImageMatrix * qImageToMatrix(const QImage &image);
-		static QImage * matrixToQImage(ImageMatrix &image);
+		static QImage * matrixToQImage(const ImageMatrix &image);
 };
 
 #endif // IMAGECONVERTER_H

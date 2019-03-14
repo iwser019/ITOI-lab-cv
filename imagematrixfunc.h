@@ -15,7 +15,7 @@ using namespace std;
  * \param matrix2 Матрица 2
  * \return Сумма матриц
  */
-ImageMatrix matrixAdd(ImageMatrix &matrix1, ImageMatrix &matrix2);
+ImageMatrix matrixAdd(const ImageMatrix &matrix1, const ImageMatrix &matrix2);
 /*!
  * \brief Сложение матрицы и числа
  * \param matrix Исходная матрица
@@ -37,15 +37,15 @@ ImageMatrix matrixSubtract(ImageMatrix &matrix1, ImageMatrix &matrix2);
  * \param resolver Объект обработки края изображения
  * \return Обработанная матрица
  */
-ImageMatrix matrixConvolute(ImageMatrix &matrix,
-							ImageMatrix &kernel,
+ImageMatrix matrixConvolute(const ImageMatrix &matrix,
+							const ImageMatrix &kernel,
 							IMatrixEdgeResolver *resolver = nullptr);
 /*!
  * \brief Нормализация матрицы
  * \param matrix Исходная матрица
  * \return Нормализованная матрица
  */
-ImageMatrix matrixNormalize(ImageMatrix &matrix);
+ImageMatrix matrixNormalize(const ImageMatrix &matrix);
 
 /* генерация ядер для свертки */
 
@@ -72,6 +72,14 @@ ImageMatrix kernelGenerateShift1px(int hShift = 0, int vShift = 0);
  */
 ImageMatrix kernelGenerateGaussian(double sigma);
 /*!
+ * \brief Генерация ядра-гауссиана (сепарабельное)
+ * \param sigma Параметр среднеквадратичного отклонения
+ * \param orientation Ориентация (false - по X, true - по Y)
+ * \return Ядро свёртки с радиусом 3*sigma
+ */
+ImageMatrix kernelGenerateGaussianSeparate(double sigma,
+										   bool orientation = false);
+/*!
  * \brief Генерация ядра равномерного размытия
  * \param radius Радиус размытия
  * \return Ядро свёртки
@@ -84,7 +92,7 @@ ImageMatrix kernelGenerateUniformBlur(int radius);
  * \param resolver Объект обработки края изображения
  * \return Обработанная матрица изображения
  */
-ImageMatrix matrixFilterSobel(ImageMatrix &matrix,
+ImageMatrix matrixFilterSobel(const ImageMatrix &matrix,
 							  int kernelType = 0,
 							  IMatrixEdgeResolver *resolver = nullptr);
 
