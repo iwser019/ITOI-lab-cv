@@ -10,6 +10,7 @@
 #include "imagematrixfunc.h"
 #include "imatrixedgeresolver.h"
 #include "matrixedgeresolverfactory.h"
+#include "scalecontainer.h"
 #include "gscene.h"
 
 namespace Ui {
@@ -39,12 +40,15 @@ class MainWindow : public QMainWindow
 
 		void on_actionBlurGaussianSeparate_triggered();
 
+		void on_actionMakePyramid_triggered();
+
 	private:
 		Ui::MainWindow *ui;
 		GScene *scOrig, *scResult;
 		QImage *imgOrig, *imgResult;
 		QActionGroup *actGrpEdgeResolve;
 		IMatrixEdgeResolver *currentResolver;
+		ScaleContainer *scaleContainer;
 		void initResultImg();
 		void showImgOrig();
 		void showImgResult();

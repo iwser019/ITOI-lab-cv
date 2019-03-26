@@ -8,6 +8,21 @@ template <typename T> T clamp(T x, T a, T b)
 	return ((x >= a) ? ((x <= b) ? x : b) : a);
 }
 
+struct Point
+{
+		int x, y;
+		Point()
+		{
+			x = 0;
+			y = 0;
+		}
+		Point(int x, int y)
+		{
+			this->x = x;
+			this->y = y;
+		}
+};
+
 /*!
  * \brief Преобразование к оттенкам серого (стандарт PAL/NTSC)
  * \param r Значение красного канала

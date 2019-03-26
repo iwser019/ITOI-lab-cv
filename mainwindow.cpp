@@ -18,7 +18,9 @@ MainWindow::MainWindow(QWidget *parent) :
 	actGrpEdgeResolve->addAction(ui->actionEdgeResolveMirror);
 	actGrpEdgeResolve->addAction(ui->actionEdgeResolveRepeat);
 	ui->actionEdgeResolveNull->setChecked(true);
-	currentResolver = MatrixEdgeResolverFactory::getInstance()->getResolver("null");
+	currentResolver = MatrixEdgeResolverFactory
+			::getInstance()->getResolver("null");
+	scaleContainer = nullptr;
 }
 
 MainWindow::~MainWindow()
@@ -171,8 +173,6 @@ void MainWindow::on_actionBlurUniform_triggered()
 	delete imgResult;
 	imgResult = resultImage;
 	delete matrix;
-	//resultMatrix.~ImageMatrix();
-	//kernelGaussian.~ImageMatrix();
 	showImgResult();
 }
 
@@ -220,4 +220,91 @@ void MainWindow::on_actionBlurGaussianSeparate_triggered()
 	imgResult = resultImage;
 	delete matrix;
 	showImgResult();
+}
+
+void MainWindow::on_actionMakePyramid_triggered()
+{
+	if (imgResult == nullptr)
+		return;
+	ImageMatrix *matrix = ImageConverter::qImageToMatrix(*imgResult);
+	scaleContainer = new ScaleContainer(matrix);
+	scaleContainer->setEdgeResolver(currentResolver);
+	int maxOctaves = matrixMaxAvailableOctaves(*matrix);
+	delete matrix;
+	int numOctaves = 0, numLevels = 0;
+	double sigmaBase = 0.0, sigmaInit = 0.0;
+	bool ok = false;
+	numOctaves = QInputDialog::getInt(
+				this,
+				"Ввод параметра",
+				"Количество октав:",
+				1,
+				1,
+				maxOctaves,
+				1,
+				&ok);
+	if (!ok)
+		return;
+	ok = false;
+	numLevels = QInputDialog::getInt(
+				this,
+				"Ввод параметра",
+				"Количество масштабов:",
+				1,
+				1,
+				1024,
+				1,
+				&ok);
+	if (!ok)
+		return;
+	ok = false;
+	sigmaBase = QInputDialog::getDouble(
+				this,
+				"Ввод параметра",
+				"Сигма (базовая):",
+				0.5,
+				DBL_MIN,
+				DBL_MAX,
+				4,
+				&ok);
+	if (!ok)
+		return;
+	ok = false;
+	sigmaInit = QInputDialog::getDouble(
+				this,
+				"Ввод параметра",
+				"Сигма (предположительная):",
+				0.5,
+				DBL_MIN,
+				DBL_MAX,
+				4,
+				&ok);
+	if (!ok)
+		return;
+	scaleContainer->build(numOctaves, numLevels, sigmaBase, sigmaInit);
+	bool okToSave = false;
+	QString dirName = QFileDialog
+			::getExistingDirectory(
+				this,
+				"Выбор папки",
+				"",
+				QFileDialog::ShowDirsOnly);
+	if (!dirName.isNull())
+	{
+		QVector<ScaleContainerRecord> records = scaleContainer->getAllImages();
+		for (ScaleContainerRecord record : records)
+		{
+			QImage *image = ImageConverter::matrixToQImage(*record.image);
+			image->save(
+						dirName
+						+ "\\"
+						+ QString("img_oct%1_lvl%2_sigLoc%3_sigGlob%4.png")
+						.arg(record.octave)
+						.arg(record.level)
+						.arg(record.sigmaGlobal)
+						.arg(record.sigmaLocal).replace(',', '.')
+						);
+			delete image;
+		}
+	}
 }

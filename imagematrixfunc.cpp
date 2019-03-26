@@ -309,3 +309,28 @@ ImageMatrix kernelGenerateGaussianSeparate(double sigma, bool orientation)
 	delete [] kernelData;
 	return result;
 }
+
+ImageMatrix matrixDownsample(const ImageMatrix &matrix)
+{
+	int width = matrix.getWidth();
+	int height = matrix.getHeight();
+	int widthResult = (((width % 2) == 0) ? (width / 2) : ((width - 1) / 2 + 1));
+	int heightResult = (((height % 2) == 0) ? (height / 2) : ((height - 1) / 2 + 1));
+	ImageMatrix result(widthResult, heightResult);
+	for (int i = 0; i < heightResult; i++)
+		for (int j = 0; j < widthResult; j++)
+			result.set(j, i, matrix.get(j * 2, i * 2));
+	return result;
+}
+
+int matrixMaxAvailableOctaves(const ImageMatrix &matrix)
+{
+	return static_cast<int>(
+				log2(
+					qMin(
+						static_cast<double>(matrix.getHeight()),
+						static_cast<double>(matrix.getWidth())
+						)
+					)
+				);
+}

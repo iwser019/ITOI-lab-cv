@@ -87,9 +87,16 @@
     </widget>
     <addaction name="menuEdgeResolve"/>
    </widget>
+   <widget class="QMenu" name="menuScale">
+    <property name="title">
+     <string>Масштаб</string>
+    </property>
+    <addaction name="actionMakePyramid"/>
+   </widget>
    <addaction name="menuFile"/>
    <addaction name="menuFilters"/>
    <addaction name="menuSettings"/>
+   <addaction name="menuScale"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
   <action name="actionLoad">
@@ -152,6 +159,11 @@
   <action name="actionBlurGaussianSeparate">
    <property name="text">
     <string>Размытие (по Гауссу) (проверка сепарабельности)</string>
+   </property>
+  </action>
+  <action name="actionMakePyramid">
+   <property name="text">
+    <string>Создать пирамиду...</string>
    </property>
   </action>
  </widget>

@@ -33,7 +33,8 @@ SOURCES += \
     imageconverter.cpp \
     imagematrixfunc.cpp \
     matrixedgeresolverfactory.cpp \
-    gscene.cpp
+    gscene.cpp \
+    scalecontainer.cpp
 
 HEADERS += \
         mainwindow.h \
@@ -44,7 +45,8 @@ HEADERS += \
     imageconverter.h \
     imagematrixfunc.h \
     matrixedgeresolverfactory.h \
-    gscene.h
+    gscene.h \
+    scalecontainer.h
 
 FORMS += \
         mainwindow.ui

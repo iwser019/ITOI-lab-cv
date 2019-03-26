@@ -15,6 +15,14 @@ ImageMatrix::ImageMatrix(int w, int h, double source[]) : ImageMatrix(w, h)
 	memcpy(this->data, source, w * h * sizeof (double));
 }
 
+ImageMatrix::ImageMatrix(const ImageMatrix &source)
+	: ImageMatrix(source.getWidth(), source.getHeight())
+{
+	memcpy(this->data,
+		   source.getSource(),
+		   source.getWidth() * source.getHeight() * sizeof(double));
+}
+
 int ImageMatrix::getWidth() const
 {
 	return width;
@@ -33,10 +41,37 @@ double ImageMatrix::get(int x, int y) const
 	return result;
 }
 
-void ImageMatrix::set(int x, int y, double source)
+double ImageMatrix::get(const Point &point) const
+{
+	return get(point.x, point.y);
+}
+
+void ImageMatrix::set(int x, int y, const double &source)
 {
 	if ((x >= 0 && x < width) && (y >= 0 && y < height))
 		this->data[y * width + x] = source;
+}
+
+void ImageMatrix::set(const Point &point, const double &source)
+{
+	set(point.x, point.y, source);
+}
+
+double *ImageMatrix::getSource() const
+{
+	return data;
+}
+
+ImageMatrix &ImageMatrix::operator=(const ImageMatrix &right)
+{
+	if (this == &right)
+		return *this;
+	double *dataOldPtr = this->data;
+	this->data = right.getSource();
+	this->height = right.getHeight();
+	this->width = right.getWidth();
+	delete[] dataOldPtr;
+	return *this;
 }
 
 ImageMatrix::~ImageMatrix()

@@ -9,6 +9,7 @@
 #include <QPainter>
 #include <QString>
 #include <QImage>
+#include <QVector>
 #include "util.h"
 
 #endif // DEFS_H

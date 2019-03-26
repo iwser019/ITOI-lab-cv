@@ -95,5 +95,17 @@ ImageMatrix kernelGenerateUniformBlur(int radius);
 ImageMatrix matrixFilterSobel(const ImageMatrix &matrix,
 							  int kernelType = 0,
 							  IMatrixEdgeResolver *resolver = nullptr);
+/*!
+ * \brief Вычисление следующего масштаба изображения
+ * \param matrix Исходная матрица
+ * \return Результирующая матрица (вдвое меньше)
+ */
+ImageMatrix matrixDownsample(const ImageMatrix &matrix);
+/*!
+ * \brief Вычисление максимального количества октав для изображения
+ * \param matrix Исходная матрица
+ * \return Максимальное число октав
+ */
+int matrixMaxAvailableOctaves(const ImageMatrix &matrix);
 
 #endif // IMAGEMATRIXFUNC_H

@@ -16,10 +16,15 @@ class ImageMatrix
 	public:
 		ImageMatrix(int w, int h);
 		ImageMatrix(int w, int h, double source[]);
+		ImageMatrix(const ImageMatrix &source);
 		int getWidth() const;
 		int getHeight() const;
 		double get(int x, int y) const;
-		void set(int x, int y, double source);
+		double get(const Point &point) const;
+		void set(int x, int y, const double &source);
+		void set(const Point &point, const double &source);
+		double * getSource() const;
+		ImageMatrix& operator=(const ImageMatrix &right);
 		~ImageMatrix();
 };
 
