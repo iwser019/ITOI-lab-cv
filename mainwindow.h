@@ -6,12 +6,14 @@
 #include <QFileDialog>
 #include <QInputDialog>
 #include "defs.h"
+#include "dialogpointsearch.h"
 #include "imageconverter.h"
 #include "imagematrixfunc.h"
 #include "imatrixedgeresolver.h"
 #include "matrixedgeresolverfactory.h"
 #include "scalecontainer.h"
 #include "gscene.h"
+#include "util.h"
 
 namespace Ui {
 	class MainWindow;
@@ -41,6 +43,8 @@ class MainWindow : public QMainWindow
 		void on_actionBlurGaussianSeparate_triggered();
 
 		void on_actionMakePyramid_triggered();
+
+		void on_actionPointSearch_triggered();
 
 	private:
 		Ui::MainWindow *ui;

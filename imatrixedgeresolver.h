@@ -3,6 +3,7 @@
 
 #include "defs.h"
 #include "imagematrix.h"
+#include "util.h"
 
 /*!
  * \brief Интерфейс обработчика края изображения

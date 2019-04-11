@@ -11,15 +11,24 @@ template <typename T> T clamp(T x, T a, T b)
 struct Point
 {
 		int x, y;
+		double value;
 		Point()
 		{
 			x = 0;
 			y = 0;
+			value = 0.0;
 		}
 		Point(int x, int y)
 		{
 			this->x = x;
 			this->y = y;
+			value = 0.0;
+		}
+		Point(int x, int y, double value)
+		{
+			this->x = x;
+			this->y = y;
+			this->value = value;
 		}
 };
 
@@ -39,4 +48,8 @@ double rgbToGrayscale(int r, int g, int b);
  * \return Значение светимости
  */
 double rgbToGrayscaleS(int r, int g, int b);
+
+double distance(const Point &point1, const Point &point2);
+
 #endif // UTIL_H
+

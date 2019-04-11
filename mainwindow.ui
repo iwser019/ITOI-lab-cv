@@ -87,16 +87,17 @@
     </widget>
     <addaction name="menuEdgeResolve"/>
    </widget>
-   <widget class="QMenu" name="menuScale">
+   <widget class="QMenu" name="menuTools">
     <property name="title">
-     <string>Масштаб</string>
+     <string>Инструменты</string>
     </property>
     <addaction name="actionMakePyramid"/>
+    <addaction name="actionPointSearch"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuFilters"/>
    <addaction name="menuSettings"/>
-   <addaction name="menuScale"/>
+   <addaction name="menuTools"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
   <action name="actionLoad">
@@ -164,6 +165,11 @@
   <action name="actionMakePyramid">
    <property name="text">
     <string>Создать пирамиду...</string>
+   </property>
+  </action>
+  <action name="actionPointSearch">
+   <property name="text">
+    <string>Поиск точек...</string>
    </property>
   </action>
  </widget>

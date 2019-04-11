@@ -4,6 +4,7 @@
 #include "defs.h"
 #include "imagematrix.h"
 #include "imatrixedgeresolver.h"
+#include "util.h"
 
 using namespace std;
 
@@ -53,7 +54,6 @@ ImageMatrix matrixNormalize(const ImageMatrix &matrix);
  * \brief Генерация ядра для частных производных
  * \param orientation Ориентация ядра (false - по X, true - по Y)
  * \param kernelType Тип ядра (0 - Собель, 1 - Щарр)
- * \param separate Сепарированное ядро
  * \return Ядро свёртки 3x3
  */
 ImageMatrix kernelGeneratePartialDeriv(bool orientation = false,
@@ -71,6 +71,12 @@ ImageMatrix kernelGenerateShift1px(int hShift = 0, int vShift = 0);
  * \return Ядро свёртки с радиусом 3*sigma
  */
 ImageMatrix kernelGenerateGaussian(double sigma);
+/*!
+ * \brief Генерация ядра-гауссиана
+ * \param radius Радиус ядра
+ * \return Ядро свёртки с заданным радиусом
+ */
+ImageMatrix kernelGenerateGaussian(int radius);
 /*!
  * \brief Генерация ядра-гауссиана (сепарабельное)
  * \param sigma Параметр среднеквадратичного отклонения
@@ -107,5 +113,40 @@ ImageMatrix matrixDownsample(const ImageMatrix &matrix);
  * \return Максимальное число октав
  */
 int matrixMaxAvailableOctaves(const ImageMatrix &matrix);
+/*!
+ * \brief Поиск "интересных" точек (оператор Моравека)
+ * \param matrix Исходная матрица
+ * \param threshold Пороговое значение
+ * \param winRadius Радиус окна
+ * \param resolver Обработчик края
+ * \return Набор точек
+ */
+QVector<Point> pointsMoravecPointOp(const ImageMatrix &matrix,
+									const double &threshold,
+									const int &winRadius,
+									IMatrixEdgeResolver *resolver = nullptr,
+									ImageMatrix *responseMap = nullptr);
+/*!
+ * \brief Поиск "интересных" точек (оператор Харриса)
+ * \param matrix Исходная матрица
+ * \param threshold Пороговое значение
+ * \param winRadius Радиус окна
+ * \param kernelType Тип ядра для вычисления произв. (0 - Собель, 1 - Щарр)
+ * \param resolver Обработчик края
+ * \return Набор точек
+ */
+QVector<Point> pointsHarrisPointOp(const ImageMatrix &matrix,
+								   const double &threshold,
+								   const int &winRadius,
+								   const int &kernelType = 0,
+								   IMatrixEdgeResolver *resolver = nullptr,
+								   ImageMatrix *responseMap = nullptr);
+/*!
+ * \brief Фильтрация "интересных точек"
+ * \param points Исходный набор точек
+ * \param maxCount Максимальное количество точек
+ * \return Отфильтрованные точки
+ */
+QVector<Point> pointsFilterANMS(QVector<Point> points, int maxCount);
 
 #endif // IMAGEMATRIXFUNC_H

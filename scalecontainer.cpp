@@ -24,14 +24,7 @@ void ScaleContainer::build(int octaveCount,
 	this->sigmaBase = baseSigma;
 	ImageMatrix initKernel = kernelGenerateGaussian(
 				sqrt(baseSigma * baseSigma - initSigma * initSigma));
-	/*
-	ImageMatrix workingMatrix(
-				matrixConvolute(
-					*this->imageSource,
-					initKernel,
-					currentResolver)
-				);
-				*/
+	// сгладим исходное изображение до начальной сигмы
 	ImageMatrix *workingMatrix = new ImageMatrix(
 				matrixConvolute(
 					*this->imageSource,
@@ -39,8 +32,11 @@ void ScaleContainer::build(int octaveCount,
 					currentResolver
 					)
 				);
+	// интервал
 	double sigmaInterval = pow(2.0, 1.0 / static_cast<double>(levelCount));
+	// локальная сигма
 	double sigmaCurrent = this->sigmaBase;
+	// для каждой октавы
 	for (int oct = 0; oct < numOctaves; oct++)
 	{
 		octaves.push_back(QVector<ImageMatrix *>());
@@ -55,6 +51,7 @@ void ScaleContainer::build(int octaveCount,
 		}
 		else
 			octaves[0].push_back(new ImageMatrix(*workingMatrix));
+		// для каждого масштаба (начиная с 1)
 		for (int level = 1; level <= numLevels; level++)
 		{
 			double sigmaInterscale = sqrt(
@@ -84,10 +81,12 @@ void ScaleContainer::build(int octaveCount,
 ImageMatrix *ScaleContainer::getClosest(double sigma)
 {
 	// тупое решение
+	// вычислим номер октавы
 	double factor = sigma / sigmaBase;
 	double scaleInterval = pow(2.0, 1.0 / static_cast<double>(numLevels));
 	double octaveIndex = log2(factor);
 	int octaveClosest = static_cast<int>(floor(octaveIndex));
+	// вычислим номер масштаба
 	double octaveClosestValue = sigmaBase * pow(2.0, floor(octaveIndex));
 	double levelIndex = log(scaleInterval) / log(sigma / octaveClosestValue);
 	int levelClosest = static_cast<int>(round(levelIndex));
@@ -99,9 +98,11 @@ Point &ScaleContainer::translateCoord(const int &x,
 									  const double &sigma) const
 {
 	// тупое решение
+	// вычислим номер октавы
 	double factor = sigma / sigmaBase;
 	double octaveIndex = log2(factor);
 	int scaleFactor = static_cast<int>(pow(2.0, floor(octaveIndex)));
+	// возвращаем координаты уменьшенные в (2^(номер_октавы)) раз
 	Point result(x / scaleFactor, y / scaleFactor);
 	return result;
 }
@@ -146,4 +147,16 @@ QVector<ScaleContainerRecord> ScaleContainer::getAllImages()
 		}
 	}
 	return result;
+}
+
+ScaleContainer::~ScaleContainer()
+{
+	while (!octaves.empty())
+	{
+		QVector<ImageMatrix *> octave = octaves.takeAt(0);
+		while (!octave.empty())
+		{
+			delete octave.takeAt(0);
+		}
+	}
 }

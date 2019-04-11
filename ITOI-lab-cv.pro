@@ -34,7 +34,8 @@ SOURCES += \
     imagematrixfunc.cpp \
     matrixedgeresolverfactory.cpp \
     gscene.cpp \
-    scalecontainer.cpp
+    scalecontainer.cpp \
+    dialogpointsearch.cpp
 
 HEADERS += \
         mainwindow.h \
@@ -46,10 +47,12 @@ HEADERS += \
     imagematrixfunc.h \
     matrixedgeresolverfactory.h \
     gscene.h \
-    scalecontainer.h
+    scalecontainer.h \
+    dialogpointsearch.h
 
 FORMS += \
-        mainwindow.ui
+        mainwindow.ui \
+    dialogpointsearch.ui
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin

@@ -2,6 +2,7 @@
 #define IMAGECONVERTER_H
 
 #include "defs.h"
+#include "util.h"
 #include "imagematrix.h"
 
 /*!

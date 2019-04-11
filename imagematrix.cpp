@@ -1,6 +1,13 @@
 #include "imagematrix.h"
 
-ImageMatrix::ImageMatrix(int w, int h)
+ImageMatrix::ImageMatrix()
+{
+	this->width = 0;
+	this->height = 0;
+	this->data = nullptr;
+}
+
+ImageMatrix::ImageMatrix(int w, int h) : ImageMatrix()
 {
 	this->width = w;
 	this->height = h;

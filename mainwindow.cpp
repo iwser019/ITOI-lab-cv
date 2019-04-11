@@ -38,7 +38,8 @@ void MainWindow::on_actionLoad_triggered()
 				);
 	if (!fname.isNull())
 	{
-		imgOrig = new QImage(fname);
+		QImage imgTmp(fname);
+		imgOrig = new QImage(imgTmp.convertToFormat(QImage::Format_RGBA8888));
 		initResultImg();
 		scOrig->initImg(imgOrig);
 		scResult->initImg(imgResult);
@@ -282,7 +283,6 @@ void MainWindow::on_actionMakePyramid_triggered()
 	if (!ok)
 		return;
 	scaleContainer->build(numOctaves, numLevels, sigmaBase, sigmaInit);
-	bool okToSave = false;
 	QString dirName = QFileDialog
 			::getExistingDirectory(
 				this,
@@ -307,4 +307,71 @@ void MainWindow::on_actionMakePyramid_triggered()
 			delete image;
 		}
 	}
+}
+
+void MainWindow::on_actionPointSearch_triggered()
+{
+	if (imgOrig == nullptr)
+		return;
+	int winSize = 1, method = 0, pointCount = -1;
+	double threshold = 0.0;
+	bool ok = false;
+	DialogPointSearch *dialog = new DialogPointSearch(this);
+	if (dialog->exec() == QDialog::Accepted)
+	{
+		ok = true;
+		winSize = dialog->getWinSize();
+		method = dialog->getMethod();
+		threshold = dialog->getThreshold();
+		pointCount = dialog->getPointCount();
+	}
+	delete dialog;
+	if (!ok)
+		return;
+	ImageMatrix *matrix = ImageConverter::qImageToMatrix(*imgOrig);
+	ImageMatrix matrixSmooth = matrixConvolute(*matrix,
+											   kernelGenerateGaussian(1.0),
+											   currentResolver);
+	QVector<Point> pointsFound;
+	ImageMatrix *responseMap = new ImageMatrix(matrix->getWidth(), matrix->getHeight());
+	if (method == 0)
+	{
+
+		pointsFound = pointsMoravecPointOp(
+					matrixSmooth,
+					threshold,
+					winSize,
+					currentResolver, responseMap
+					);
+		ImageConverter::matrixToQImage(*responseMap)->save("responsemap.png");
+		delete responseMap;
+	}
+	else if (method == 1)
+	{
+		pointsFound = pointsHarrisPointOp(
+					matrixSmooth,
+					threshold,
+					winSize,
+					0,
+					currentResolver, responseMap
+					);
+		ImageConverter::matrixToQImage(*responseMap)->save("responsemap.png");
+		delete responseMap;
+	}
+	else
+		return;
+	if (pointCount > 0)
+	{
+		pointsFound = pointsFilterANMS(pointsFound, pointCount);
+	}
+	delete matrix;
+	QImage *imageResult = new QImage(*imgOrig);
+	QPainter painter(imageResult);
+	painter.setBrush(QBrush(Qt::red));
+	for(Point point : pointsFound)
+	{
+		painter.drawEllipse(QPoint(point.x, point.y), 2, 2);
+	}
+	imgResult = imageResult;
+	showImgResult();
 }

@@ -2,6 +2,7 @@
 #define IMAGEMATRIX_H
 
 #include "defs.h"
+#include "util.h"
 
 /*!
  * \brief Матрица изображения
@@ -14,6 +15,7 @@ class ImageMatrix
 		// изображение (один канал)
 		double *data;
 	public:
+		ImageMatrix();
 		ImageMatrix(int w, int h);
 		ImageMatrix(int w, int h, double source[]);
 		ImageMatrix(const ImageMatrix &source);

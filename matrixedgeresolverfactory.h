@@ -3,6 +3,7 @@
 
 #include "defs.h"
 #include "imatrixedgeresolver.h"
+#include "util.h"
 
 using namespace std;
 
