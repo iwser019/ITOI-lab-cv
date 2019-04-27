@@ -35,7 +35,8 @@ SOURCES += \
     matrixedgeresolverfactory.cpp \
     gscene.cpp \
     scalecontainer.cpp \
-    dialogpointsearch.cpp
+    dialogpointsearch.cpp \
+    imagedescriptor.cpp
 
 HEADERS += \
         mainwindow.h \
@@ -48,7 +49,8 @@ HEADERS += \
     matrixedgeresolverfactory.h \
     gscene.h \
     scalecontainer.h \
-    dialogpointsearch.h
+    dialogpointsearch.h \
+    imagedescriptor.h
 
 FORMS += \
         mainwindow.ui \

@@ -96,6 +96,61 @@ void MainWindow::showImgResult()
 		scResult->initImg(imgResult);
 }
 
+QVector<Point> MainWindow::searchPoints(const ImageMatrix &matrix)
+{
+	QVector<Point> pointsFound;
+	int winSize = 1, method = 0, pointCount = -1;
+	double threshold = 0.0;
+	bool ok = false;
+	DialogPointSearch *dialog = new DialogPointSearch(this);
+	if (dialog->exec() == QDialog::Accepted)
+	{
+		ok = true;
+		winSize = dialog->getWinSize();
+		method = dialog->getMethod();
+		threshold = dialog->getThreshold();
+		pointCount = dialog->getPointCount();
+	}
+	delete dialog;
+	if (!ok)
+		return pointsFound;
+	ImageMatrix matrixSmooth = matrixConvolute(matrix,
+											   kernelGenerateGaussian(1.0),
+											   currentResolver);
+
+	ImageMatrix *responseMap = new ImageMatrix(matrix.getWidth(), matrix.getHeight());
+	if (method == 0)
+	{
+
+		pointsFound = pointsMoravecPointOp(
+					matrixSmooth,
+					threshold,
+					winSize,
+					currentResolver, responseMap
+					);
+		ImageConverter::matrixToQImage(*responseMap)->save("responsemap.png");
+		delete responseMap;
+	}
+	else if (method == 1)
+	{
+		pointsFound = pointsHarrisPointOp(
+					matrixSmooth,
+					threshold,
+					winSize,
+					0,
+					currentResolver, responseMap
+					);
+		ImageConverter::matrixToQImage(*responseMap)->save("responsemap.png");
+		delete responseMap;
+	}
+	else
+		return pointsFound;
+	if (pointCount > 0)
+	{
+		pointsFound = pointsFilterANMS(pointsFound, pointCount);
+	}
+}
+
 void MainWindow::on_actionBlurGaussian_triggered()
 {
 	double sigma;
@@ -135,11 +190,13 @@ void MainWindow::on_actionSobel_triggered()
 				this,
 				"Ввод параметра",
 				"Тип ядра\n0 - Собель\n1 - Щарр",
-				0,
-				0,
-				1);
+				KERNEL_SOBEL,
+				KERNEL_SOBEL,
+				KERNEL_SCHARR);
 	ImageMatrix *matrix = ImageConverter::qImageToMatrix(*imgResult);
-	ImageMatrix matrixResult = matrixFilterSobel(*matrix, 0, currentResolver);
+	ImageMatrix matrixResult = matrixFilterSobel(*matrix,
+												 kernelType,
+												 currentResolver);
 	QImage *resultImage = ImageConverter::matrixToQImage(matrixResult);
 	delete imgResult;
 	imgResult = resultImage;
@@ -313,57 +370,18 @@ void MainWindow::on_actionPointSearch_triggered()
 {
 	if (imgOrig == nullptr)
 		return;
-	int winSize = 1, method = 0, pointCount = -1;
-	double threshold = 0.0;
-	bool ok = false;
-	DialogPointSearch *dialog = new DialogPointSearch(this);
-	if (dialog->exec() == QDialog::Accepted)
-	{
-		ok = true;
-		winSize = dialog->getWinSize();
-		method = dialog->getMethod();
-		threshold = dialog->getThreshold();
-		pointCount = dialog->getPointCount();
-	}
-	delete dialog;
-	if (!ok)
+	QString imgOtherPath = QFileDialog::getOpenFileName(
+				this,
+				"Открыть другое изображение...",
+				QDir::currentPath(),
+				tr("Изображения (*.jpg *.jpeg *.png *.bmp *.gif)")
+				);
+	if (imgOtherPath.isEmpty())
 		return;
+	QImage imgTmp(imgOtherPath);
+	QImage *imgOther = new QImage(imgTmp.convertToFormat(QImage::Format_RGBA8888));
 	ImageMatrix *matrix = ImageConverter::qImageToMatrix(*imgOrig);
-	ImageMatrix matrixSmooth = matrixConvolute(*matrix,
-											   kernelGenerateGaussian(1.0),
-											   currentResolver);
-	QVector<Point> pointsFound;
-	ImageMatrix *responseMap = new ImageMatrix(matrix->getWidth(), matrix->getHeight());
-	if (method == 0)
-	{
-
-		pointsFound = pointsMoravecPointOp(
-					matrixSmooth,
-					threshold,
-					winSize,
-					currentResolver, responseMap
-					);
-		ImageConverter::matrixToQImage(*responseMap)->save("responsemap.png");
-		delete responseMap;
-	}
-	else if (method == 1)
-	{
-		pointsFound = pointsHarrisPointOp(
-					matrixSmooth,
-					threshold,
-					winSize,
-					0,
-					currentResolver, responseMap
-					);
-		ImageConverter::matrixToQImage(*responseMap)->save("responsemap.png");
-		delete responseMap;
-	}
-	else
-		return;
-	if (pointCount > 0)
-	{
-		pointsFound = pointsFilterANMS(pointsFound, pointCount);
-	}
+	QVector<Point> pointsFound = searchPoints(*matrix);
 	delete matrix;
 	QImage *imageResult = new QImage(*imgOrig);
 	QPainter painter(imageResult);
@@ -373,5 +391,117 @@ void MainWindow::on_actionPointSearch_triggered()
 		painter.drawEllipse(QPoint(point.x, point.y), 2, 2);
 	}
 	imgResult = imageResult;
+	delete imgOther;
+	showImgResult();
+}
+
+void MainWindow::on_actionDescriptorsBuild_triggered()
+{
+	bool ok = false;
+	if (imgOrig == nullptr)
+		return;
+	int blockSize = DESC_BLOCK_SIZE;
+	int gridSize = DESC_GRID_SIZE;
+	int angleCount = DESC_ANGLE_COUNT;
+	blockSize = QInputDialog::getInt(
+				this,
+				"Ввод параметра",
+				"Размер блока:",
+				DESC_BLOCK_SIZE,
+				1,
+				1024,
+				1,
+				&ok);
+	if (!ok)
+		return;
+	gridSize = QInputDialog::getInt(
+				this,
+				"Ввод параметра",
+				"Размер сетки в блоках:",
+				DESC_GRID_SIZE,
+				1,
+				1024,
+				1,
+				&ok);
+	if (!ok)
+		return;
+	angleCount = QInputDialog::getInt(
+				this,
+				"Ввод параметра",
+				"Количество корзин гистограммы:",
+				DESC_ANGLE_COUNT,
+				1,
+				1024,
+				1,
+				&ok);
+	if (!ok)
+		return;
+	QString imgOtherPath = QFileDialog::getOpenFileName(
+				this,
+				"Открыть другое изображение...",
+				QDir::currentPath(),
+				tr("Изображения (*.jpg *.jpeg *.png *.bmp *.gif)")
+				);
+	if (imgOtherPath.isEmpty())
+		return;
+	QImage imgTmp(imgOtherPath);
+	QImage *imgOther = new QImage(imgTmp.convertToFormat(QImage::Format_RGBA8888));
+	ImageMatrix *matrix = ImageConverter::qImageToMatrix(*imgOrig);
+	ImageMatrix *matrixOther = ImageConverter::qImageToMatrix(*imgOther);
+	QVector<Point> pointsFound = searchPoints(*matrix);
+	QVector<Point> pointsFoundOther = searchPoints(*matrixOther);
+	QVector<ImageDescriptor> descriptors = descrBuildByPatch(
+				*matrix,
+				pointsFound,
+				blockSize,
+				gridSize,
+				angleCount,
+				currentResolver);
+	QVector<ImageDescriptor> descriptorsOther = descrBuildByPatch(
+				*matrixOther,
+				pointsFoundOther,
+				blockSize,
+				gridSize,
+				angleCount,
+				currentResolver);
+	delete matrix;
+	delete matrixOther;
+	int widthOrig = imgOrig->width();
+	QImage *imageResult = new QImage(widthOrig + imgOther->width(),
+									 qMax(imgOrig->height(), imgOther->height()),
+									 QImage::Format_RGBA8888
+									 );
+	QPainter painter(imageResult);
+	painter.drawPixmap(0, 0,
+					   widthOrig, imgOrig->height(),
+					   QPixmap::fromImage(*imgOrig));
+	painter.drawPixmap(widthOrig + 1, 0,
+					   imgOther->width(), imgOther->height(),
+					   QPixmap::fromImage(*imgOther));
+	painter.setPen(QColor(Qt::cyan));
+	painter.setBrush(QBrush(Qt::red));
+	/*
+	for(Point point : pointsFound)
+	{
+		painter.drawEllipse(QPoint(point.x, point.y), 2, 2);
+	}
+	*/
+	for (ImageDescriptor descriptor : descriptors)
+	{
+		ImageDescriptor descriptorClosest = descriptorFindClosest(
+					descriptor,
+					descriptorsOther);
+		Point point = descriptor.getPoint();
+		Point pointClosest = descriptorClosest.getPoint();
+		pointClosest.x += widthOrig;
+		painter.drawEllipse(QPoint(point.x, point.y), 2, 2);
+		painter.drawEllipse(QPoint(pointClosest.x, pointClosest.y), 2, 2);
+		painter.drawLine(point.x,
+						 point.y,
+						 pointClosest.x,
+						 pointClosest.y);
+	}
+	imgResult = imageResult;
+	delete imgOther;
 	showImgResult();
 }

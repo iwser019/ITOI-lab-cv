@@ -27,3 +27,18 @@ double distance(const Point &point1, const Point &point2)
 				);
 	return result;
 }
+
+void vectorDblNormalize(QVector<double> *vec)
+{
+	double valMin = DBL_MAX;
+	double valMax = DBL_MIN;
+	for (double val : *vec)
+	{
+		valMax = qMax(valMax, val);
+		valMin = qMin(valMin, val);
+	}
+	double dist = valMax - valMin;
+	int sizeInt = vec->size();
+	for (int i = 0; i < sizeInt; i++)
+		vec->replace(i, (vec->at(i) - valMin) / dist);
+}

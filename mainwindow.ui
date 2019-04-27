@@ -93,6 +93,7 @@
     </property>
     <addaction name="actionMakePyramid"/>
     <addaction name="actionPointSearch"/>
+    <addaction name="actionDescriptorsBuild"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuFilters"/>
@@ -170,6 +171,11 @@
   <action name="actionPointSearch">
    <property name="text">
     <string>Поиск точек...</string>
+   </property>
+  </action>
+  <action name="actionDescriptorsBuild">
+   <property name="text">
+    <string>Построение дескрипторов...</string>
    </property>
   </action>
  </widget>

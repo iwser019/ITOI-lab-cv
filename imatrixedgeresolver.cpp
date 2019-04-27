@@ -42,6 +42,12 @@ double MatrixEdgeResolverRepeat::resolve(const ImageMatrix &matrix, int x, int y
 	double result = 0.0;
 	int width = matrix.getWidth();
 	int height = matrix.getHeight();
-
+	int xDest = x;
+	while (xDest < 0)
+		xDest += width;
+	int yDest = y;
+	while (yDest < 0)
+		yDest += height;
+	result = matrix.get(xDest % width, yDest % height);
 	return result;
 }

@@ -35,16 +35,13 @@ class MainWindow : public QMainWindow
 		void on_actionEdgeResolveRepeat_triggered();
 		void on_actionBlurGaussian_triggered();
 		void on_actionSobel_triggered();
-
 		void on_actionBlurUniform_triggered();
-
 		void on_actionReset_triggered();
-
 		void on_actionBlurGaussianSeparate_triggered();
-
 		void on_actionMakePyramid_triggered();
-
 		void on_actionPointSearch_triggered();
+
+		void on_actionDescriptorsBuild_triggered();
 
 	private:
 		Ui::MainWindow *ui;
@@ -56,6 +53,7 @@ class MainWindow : public QMainWindow
 		void initResultImg();
 		void showImgOrig();
 		void showImgResult();
+		QVector<Point> searchPoints(const ImageMatrix &matrix);
 };
 
 #endif // MAINWINDOW_H

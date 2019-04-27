@@ -4,7 +4,7 @@ MatrixEdgeResolverFactory * MatrixEdgeResolverFactory::instance = nullptr;
 
 MatrixEdgeResolverFactory::MatrixEdgeResolverFactory()
 {
-
+	this->currentChoice = "null";
 }
 
 MatrixEdgeResolverFactory * MatrixEdgeResolverFactory::getInstance()
@@ -12,6 +12,11 @@ MatrixEdgeResolverFactory * MatrixEdgeResolverFactory::getInstance()
 	if (instance == nullptr)
 		instance = new MatrixEdgeResolverFactory();
 	return instance;
+}
+
+void MatrixEdgeResolverFactory::chooseResolver(QString resolverType)
+{
+	this->currentChoice = resolverType;
 }
 
 IMatrixEdgeResolver *MatrixEdgeResolverFactory::getResolver(QString resolverType)
@@ -29,5 +34,11 @@ IMatrixEdgeResolver *MatrixEdgeResolverFactory::getResolver(QString resolverType
 			resolver = new MatrixEdgeResolverRepeat();
 		resolvers[resolverType] = resolver;
 	}
+	currentChoice = resolverType;
 	return resolvers[resolverType];
+}
+
+IMatrixEdgeResolver *MatrixEdgeResolverFactory::getLastResolver()
+{
+	return getResolver(this->currentChoice);
 }

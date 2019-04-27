@@ -32,7 +32,7 @@ ImageMatrix matrixConvolute(const ImageMatrix &matrix,
 	int heightKernel = kernel.getHeight();
 	IMatrixEdgeResolver *currentResolver = nullptr;
 	if (resolver == nullptr)
-		currentResolver = new MatrixEdgeResolverNull();
+		currentResolver = MatrixEdgeResolverFactory::getInstance()->getLastResolver();
 	else
 		currentResolver = resolver;
 	ImageMatrix result(width, height);
@@ -46,8 +46,15 @@ ImageMatrix matrixConvolute(const ImageMatrix &matrix,
 			for (int u = -kernelOffsetY; u <= kernelOffsetY; u++)
 				for (int v = -kernelOffsetX; v <= kernelOffsetX; v++)
 				{
-					double valueKernel = kernel.get(v + kernelOffsetX, u + kernelOffsetY);
-					double valueResolved = currentResolver->resolve(matrix, j - v, i - u);
+					double valueKernel = kernel.get(
+								v + kernelOffsetX,
+								u + kernelOffsetY
+								);
+					double valueResolved = currentResolver->resolve(
+								matrix,
+								j - v,
+								i - u
+								);
 					value += (valueKernel * valueResolved);
 				}
 			result.set(j, i, value);
@@ -288,7 +295,8 @@ ImageMatrix matrixAddScalar(ImageMatrix &matrix, double value)
 
 ImageMatrix matrixFilterSobel(const ImageMatrix &matrix,
 							  int kernelType,
-							  IMatrixEdgeResolver *resolver)
+							  IMatrixEdgeResolver *resolver,
+							  ImageMatrix *angleMap)
 {
 	int width = matrix.getWidth();
 	int height = matrix.getHeight();
@@ -296,8 +304,6 @@ ImageMatrix matrixFilterSobel(const ImageMatrix &matrix,
 	ImageMatrix kernelY = kernelGeneratePartialDeriv(true, kernelType);
 	ImageMatrix matrixX = matrixConvolute(matrix, kernelX, resolver);
 	ImageMatrix matrixY = matrixConvolute(matrix, kernelY, resolver);
-	//ImageMatrix matrixXNorm = matrixNormalize(matrixX);
-	//ImageMatrix matrixYNorm = matrixNormalize(matrixY);
 	ImageMatrix result(width, height);
 	for (int i = 0; i < height; i++)
 		for (int j = 0; j < width; j++)
@@ -308,6 +314,14 @@ ImageMatrix matrixFilterSobel(const ImageMatrix &matrix,
 			result.set(j, i, square);
 		}
 	ImageMatrix resultNorm = matrixNormalize(result);
+	if (angleMap != nullptr)
+	{
+		for (int i = 0; i < height; i++)
+			for (int j = 0; j < width; j++)
+			{
+				angleMap->set(j, i, atan2(matrixY.get(j, i), matrixX.get(j, i)));
+			}
+	}
 	return resultNorm;
 }
 
@@ -342,8 +356,10 @@ ImageMatrix matrixDownsample(const ImageMatrix &matrix)
 {
 	int width = matrix.getWidth();
 	int height = matrix.getHeight();
-	int widthResult = (((width % 2) == 0) ? (width / 2) : ((width - 1) / 2 + 1));
-	int heightResult = (((height % 2) == 0) ? (height / 2) : ((height - 1) / 2 + 1));
+	//int widthResult = (((width % 2) == 0) ? (width / 2) : ((width - 1) / 2 + 1));
+	int widthResult = width / 2;
+	//int heightResult = (((height % 2) == 0) ? (height / 2) : ((height - 1) / 2 + 1));
+	int heightResult = height / 2;
 	ImageMatrix result(widthResult, heightResult);
 	for (int i = 0; i < heightResult; i++)
 		for (int j = 0; j < widthResult; j++)
@@ -373,6 +389,9 @@ QVector<Point> pointsMoravecPointOp(const ImageMatrix &matrix,
 	int width = matrix.getWidth();
 	int height = matrix.getHeight();
 	double *minima = new double[width * height];
+	IMatrixEdgeResolver *currentResolver = resolver;
+	if (resolver == nullptr)
+		currentResolver = MatrixEdgeResolverFactory::getInstance()->getLastResolver();
 	QVector<Point> result;
 	// окрестность
 	QVector<Point> neighborhood;
@@ -402,8 +421,8 @@ QVector<Point> pointsMoravecPointOp(const ImageMatrix &matrix,
 					for (int u = -winRadius; u <= winRadius; u++)
 					{
 						Point curPoint(neighbor.x + u, neighbor.y + v);
-						double valCenterWindow = resolver->resolve(matrix, j + u, i + v);
-						double valNeighborWindow = resolver->resolve(matrix, curPoint.x, curPoint.y);
+						double valCenterWindow = currentResolver->resolve(matrix, j + u, i + v);
+						double valNeighborWindow = currentResolver->resolve(matrix, curPoint.x, curPoint.y);
 						double valWindow = (valNeighborWindow - valCenterWindow);
 						value += valWindow * valWindow;
 					}
@@ -461,6 +480,9 @@ QVector<Point> pointsHarrisPointOp(const ImageMatrix &matrix,
 {
 	int width = matrix.getWidth();
 	int height = matrix.getHeight();
+	IMatrixEdgeResolver *currentResolver = resolver;
+	if (resolver == nullptr)
+		currentResolver = MatrixEdgeResolverFactory::getInstance()->getLastResolver();
 	QVector<Point> result;
 	QVector<Point> neighborhood;
 	double *minima = new double[width * height];
@@ -469,8 +491,8 @@ QVector<Point> pointsHarrisPointOp(const ImageMatrix &matrix,
 	ImageMatrix kernelPartialDivY = kernelGeneratePartialDeriv(true, kernelType);
 	ImageMatrix kernelWeight = kernelGenerateGaussian(winRadius);
 	// частные производные
-	ImageMatrix matrixDivX = matrixConvolute(matrix, kernelPartialDivX, resolver);
-	ImageMatrix matrixDivY = matrixConvolute(matrix, kernelPartialDivY, resolver);
+	ImageMatrix matrixDivX = matrixConvolute(matrix, kernelPartialDivX, currentResolver);
+	ImageMatrix matrixDivY = matrixConvolute(matrix, kernelPartialDivY, currentResolver);
 	// цикл по Y
 	for (int i = 0; i < height; i++)
 	{
@@ -486,8 +508,8 @@ QVector<Point> pointsHarrisPointOp(const ImageMatrix &matrix,
 								u + winRadius,
 								v + winRadius
 								);
-					double valDivX = resolver->resolve(matrixDivX, j + u, i + v);
-					double valDivY = resolver->resolve(matrixDivY, j + u, i + v);
+					double valDivX = currentResolver->resolve(matrixDivX, j + u, i + v);
+					double valDivY = currentResolver->resolve(matrixDivY, j + u, i + v);
 					A += multiplier * valDivX * valDivX;
 					B += multiplier * valDivX * valDivY;
 					C += multiplier * valDivY * valDivY;
@@ -567,15 +589,89 @@ QVector<Point> pointsFilterANMS(QVector<Point> points, int maxCount)
 			{
 				if (distance(result[i], result[j]) <= radius)
 				{
-					std::cout << "Udalil na " << j << " iz " << pointCount << std::endl;
 					result.removeAt(j);
 					pointCount--;
 					j--;
 				}
 			}
 		}
-		std::cout << "Ostalos\' " << pointCount << " tochek pri radiuse " << radius << std::endl;
 		radius += 0.9;
+	}
+	return result;
+}
+
+QVector<ImageDescriptor> descrBuildByPatch(const ImageMatrix &matrix,
+										   const QVector<Point> points,
+										   int blockSize,
+										   int gridSize,
+										   int angleCount,
+										   IMatrixEdgeResolver *resolver)
+{
+	QVector<ImageDescriptor> result;
+	QVector<double> currentBinData;
+	QVector<double> descriptorData;
+	int descRadius = (blockSize * gridSize) / 2;
+	const double dblPi = 2.0 * M_PI;
+	double angleStep = dblPi / static_cast<double>(angleCount);
+	double curGradVal = 0.0;
+	double curGradAngle = 0.0;
+	int width = matrix.getWidth();
+	int height = matrix.getHeight();
+	IMatrixEdgeResolver *currentResolver = resolver;
+	if (resolver == nullptr)
+		currentResolver = MatrixEdgeResolverFactory::getInstance()->getLastResolver();
+	ImageMatrix angleMap(width, height);
+	ImageMatrix gradientMap = matrixFilterSobel(matrix,
+												KERNEL_SOBEL,
+												currentResolver,
+												&angleMap);
+	for (Point point : points)
+	{
+		int anchorX = point.x - descRadius;
+		int anchorY = point.y - descRadius;
+		currentBinData.clear();
+		descriptorData.clear();
+		for (int blockY = 0; blockY < gridSize; blockY++)
+			for (int blockX = 0; blockX < gridSize; blockX++)
+			{
+				currentBinData.fill(0.0, angleCount);
+				int curX = anchorX + blockX * blockSize;
+				int curY = anchorY + blockY * blockSize;
+				int limitX = curX + (blockSize - 1);
+				int limitY = curY + (blockSize - 1);
+				for (; curY <= limitY; curY++)
+					for (; curX <= limitX; curX++)
+					{
+						curGradVal = clampPeriodic(
+									currentResolver->resolve(
+										gradientMap,
+										curX,
+										curY
+										),
+									0.0,
+									M_PI
+									);
+						curGradAngle = clampPeriodic(currentResolver->resolve(
+														 angleMap,
+														 curX,
+														 curY
+														 ),
+													 0.0,
+													 M_PI);
+						double binNumCoeff = floor(curGradAngle / angleStep);
+						double binCenter = binNumCoeff + 0.5;
+						double binDistProp = fabs(binCenter - curGradAngle);
+						int binFirst = static_cast<int>(binNumCoeff);
+						int binSecond = (binFirst + 1) % angleCount;
+						currentBinData[binFirst] += curGradVal * binDistProp;
+						currentBinData[binSecond] += curGradVal * (1.0 - binDistProp);
+
+					}
+				vectorDblNormalize(&currentBinData);
+				while(!currentBinData.empty())
+					descriptorData.push_back(currentBinData.takeAt(0));
+			}
+		result.push_back(ImageDescriptor(point, descriptorData));
 	}
 	return result;
 }

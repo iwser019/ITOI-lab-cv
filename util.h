@@ -8,6 +8,17 @@ template <typename T> T clamp(T x, T a, T b)
 	return ((x >= a) ? ((x <= b) ? x : b) : a);
 }
 
+template <typename T> T clampPeriodic(T x, T a, T b)
+{
+	T result = x;
+	T distance = (b - a);
+	while (result < a)
+		result += distance;
+	while (result > b)
+		result -= distance;
+	return result;
+}
+
 struct Point
 {
 		int x, y;
@@ -50,6 +61,8 @@ double rgbToGrayscale(int r, int g, int b);
 double rgbToGrayscaleS(int r, int g, int b);
 
 double distance(const Point &point1, const Point &point2);
+
+void vectorDblNormalize(QVector<double> *vec);
 
 #endif // UTIL_H
 

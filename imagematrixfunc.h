@@ -2,8 +2,10 @@
 #define IMAGEMATRIXFUNC_H
 
 #include "defs.h"
+#include "imagedescriptor.h"
 #include "imagematrix.h"
 #include "imatrixedgeresolver.h"
+#include "matrixedgeresolverfactory.h"
 #include "util.h"
 
 using namespace std;
@@ -57,7 +59,7 @@ ImageMatrix matrixNormalize(const ImageMatrix &matrix);
  * \return Ядро свёртки 3x3
  */
 ImageMatrix kernelGeneratePartialDeriv(bool orientation = false,
-									   int kernelType = 0);
+									   int kernelType = KERNEL_SOBEL);
 /*!
  * \brief Генерация ядра для сдвига на 1 px
  * \param hShift Сдвиг по горизонтали (0 - нет, 1 - влево, 2 - вправо)
@@ -96,11 +98,13 @@ ImageMatrix kernelGenerateUniformBlur(int radius);
  * \param matrix Исходная матрица
  * \param kernelType Тип ядра (Собель/Щарр)
  * \param resolver Объект обработки края изображения
+ * \param angleMap Вывод для карты углов
  * \return Обработанная матрица изображения
  */
 ImageMatrix matrixFilterSobel(const ImageMatrix &matrix,
-							  int kernelType = 0,
-							  IMatrixEdgeResolver *resolver = nullptr);
+							  int kernelType = KERNEL_SOBEL,
+							  IMatrixEdgeResolver *resolver = nullptr,
+							  ImageMatrix *angleMap = nullptr);
 /*!
  * \brief Вычисление следующего масштаба изображения
  * \param matrix Исходная матрица
@@ -119,6 +123,7 @@ int matrixMaxAvailableOctaves(const ImageMatrix &matrix);
  * \param threshold Пороговое значение
  * \param winRadius Радиус окна
  * \param resolver Обработчик края
+ * \param responseMap Вывод для карты отклика
  * \return Набор точек
  */
 QVector<Point> pointsMoravecPointOp(const ImageMatrix &matrix,
@@ -133,12 +138,13 @@ QVector<Point> pointsMoravecPointOp(const ImageMatrix &matrix,
  * \param winRadius Радиус окна
  * \param kernelType Тип ядра для вычисления произв. (0 - Собель, 1 - Щарр)
  * \param resolver Обработчик края
+ * \param responseMap Вывод для карты отклика
  * \return Набор точек
  */
 QVector<Point> pointsHarrisPointOp(const ImageMatrix &matrix,
 								   const double &threshold,
 								   const int &winRadius,
-								   const int &kernelType = 0,
+								   const int &kernelType = KERNEL_SOBEL,
 								   IMatrixEdgeResolver *resolver = nullptr,
 								   ImageMatrix *responseMap = nullptr);
 /*!
@@ -148,5 +154,22 @@ QVector<Point> pointsHarrisPointOp(const ImageMatrix &matrix,
  * \return Отфильтрованные точки
  */
 QVector<Point> pointsFilterANMS(QVector<Point> points, int maxCount);
+
+/*!
+ * \brief Построение дескрипторов инт. точек при пом. патчей
+ * \param matrix Исходная матрица
+ * \param points Набор интересных точек
+ * \param blockSize Размер блока
+ * \param gridSize Размер сетки в блоках
+ * \param angleCount Количество корзин гистограммы
+ * \param resolver Обработчик края
+ * \return Набор дескрипторов интересных точек
+ */
+QVector<ImageDescriptor> descrBuildByPatch(const ImageMatrix &matrix,
+										   const QVector<Point> points,
+										   int blockSize = DESC_BLOCK_SIZE,
+										   int gridSize = DESC_GRID_SIZE,
+										   int angleCount = DESC_ANGLE_COUNT,
+										   IMatrixEdgeResolver *resolver = nullptr);
 
 #endif // IMAGEMATRIXFUNC_H
